@@ -23,8 +23,9 @@ fi
 if [[ -z "${repo_root}" ]]; then
 	# if don't have the variable, repeat similar process to get directory this script is in, which should be under individual_modules subfolder of the repo
 	full_path=$(realpath $0)
-	repo_root=$(dirname $full_path)
-	func_root="$repo_root"/functions_called
+	repo_root_int=$(dirname $full_path)
+	repo_root=$(dirname $repo_root_int) # go up one more if called from module!
+	func_root="$repo_root"/individual_modules/functions_called
 else
 	func_root="$repo_root"/individual_modules/functions_called
 	pipeline="Y" # flag to see that this was called via pipeline, so can start to setup email

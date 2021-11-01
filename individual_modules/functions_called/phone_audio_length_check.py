@@ -77,7 +77,9 @@ def audio_length_check(study, length_limit):
 if __name__ == '__main__':
 	# Map command line arguments to function arguments.
 	try:
-		audio_length_check(sys.argv[1], sys.argv[2])
+		study_inp = sys.argv[1]
+		length_inp = sys.argv[2]
 	except:
 		print("Invalid arguments")
 		sys.exit(0) # exit with okay status, as won't prevent sending unless explicit length argument was supplied
+	audio_length_check(study_inp, length_inp) # need to run without a try/catch so exit 1 will actually work!

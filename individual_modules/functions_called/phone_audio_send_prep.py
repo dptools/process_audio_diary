@@ -28,7 +28,7 @@ def move_audio_to_send(study, OLID, length_cutoff, db_cutoff):
 			os.remove(filen) # make sure OpenSMILE log files don't count towards the error rate!
 			continue
 		if filen=="foreground_audio":
-			os.remove(filen) # can also remove the foreground audios now
+			shutil.rmtree(filen) # can also remove the foreground audios now
 			continue
 
 		# match filename directly in the DPDash CSV - if it doesn't match assume this means it was a second recording from the same day

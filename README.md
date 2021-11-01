@@ -21,17 +21,21 @@ The current version of this repository matches what is used internally for Baker
 ### Setup <a name="setup"></a>
 All necessary Python (3.9) dependencies can be found in the setup/audio_process.yml file in this repo. As long as you have Anaconda installed, you can easily create a Python enviornment for running this code by moving to the setup folder and running:
 
-	conda env create -f process_audio.yml
+	conda env create -f audio_process.yml
 
 To activate the environment, which should be done each time before running the code, use:
 	
-	conda activate process_audio
+	conda activate audio_process
 
-Note that before the first time running on a new machine, it may be necessary to start Python and enter the following two commands, in order for the NLP features script to work:
+Note that before the first time running on a new machine, it may be necessary to start Python (in the activated conda environment) and enter the following two commands, in order for the NLP features script to work:
 
 	import nltk
 	nltk.download('cmudict')
 
+It will also be necessary to install the lab encryption model for a first run, if the raw files need to be decrypted. To do so, enter the following command after activating the environment:
+
+	pip install cryptease
+	
 Other dependencies are OpenSMILE (2.3.0) and ffmpeg (4.3.2), as well as the ability to run bash scripts and a working mail command - the latter two should be available on any standard Linux server. 
 
 

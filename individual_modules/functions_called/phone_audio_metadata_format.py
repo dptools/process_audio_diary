@@ -108,7 +108,7 @@ def create_eastern_time_filemap(study, OLID):
 		cur_recording_number = cur_recording_number + 1
 
 	df_columns = ["iso_date", "year_int", "month_int", "day_int", "survey_answer_available", "ET_hour_int_formatted", "ET_time_formatted_string", "original_filepath", "new_filename", "recording_number"]
-	iso_dates = days.keys()
+	iso_dates = list(days.keys())
 	iso_dates.sort()
 	years = []
 	months = []
