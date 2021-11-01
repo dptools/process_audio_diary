@@ -29,6 +29,16 @@ else
 	func_root="$repo_root"/individual_modules/functions_called
 	pipeline="Y" # flag to see that this was called via pipeline, so can start to setup email
 fi
+# also collect send limit information
+if [[ -z "${auto_send_limit_bool}" ]]; then
+	echo "Would you like to set an upper limit on the amount of audio the code can send? (Y or N)"
+	read auto_send_limit_bool
+	if [ $auto_send_limit_bool = "Y" ] || [ $auto_send_limit_bool = "y" ]; then
+		echo "Maximum sum audio length (in minutes)?"
+		read auto_send_limit
+	fi
+	# if auto_send_limit_bool is set, will assume auto_send_limit should be too, as should be calling from pipeline
+fi
 # finally, need to collect transcribeme sftp password if don't have it
 if [[ -z "${transcribeme_password}" ]]; then
 	echo "TranscribeMe account password?"
@@ -39,11 +49,28 @@ if [[ -z "${transcribeme_password}" ]]; then
 	echo "Beginning script for study:"
 	echo "$study"
 	echo "all files currently in to_send folder for each patient in this study will be uploaded to TranscribeMe"
+	if [ $auto_send_limit_bool = "Y" ] || [ $auto_send_limit_bool = "y" ]; then
+		echo "as long as the total minutes of audio across patients does not exceed:"
+		echo "$auto_send_limit"
+	fi
 	echo ""
 fi
 
 # body:
-# actually start running the main computations
+# actually start running the main computations - first check that total length doesn't exceed the threshold, if necessary
+if [ $auto_send_limit_bool = "Y" ] || [ $auto_send_limit_bool = "y" ]; then
+	python "$func_root"/phone_audio_length_check.py "$study" "$auto_send_limit"
+	if [ $? = 1 ]; then # function returns with error code if length exceeded
+		# if called from pipeline will need to update the email body to denote the length was exceeded
+		if [[ -e "$repo_root"/audio_lab_email_body.txt ]]; then 
+			echo "Note that no audio was uploaded to TranscribeMe because the total length exceeded the input limit of ${auto_send_limit} minutes" >> "$repo_root"/audio_lab_email_body.txt
+			echo "" >> "$repo_root"/audio_lab_email_body.txt
+		fi
+		exit 0 # so exit with status okay, no problems but don't want to proceed with transcript upload code below
+	fi
+fi
+
+# now start going through patients for the upload
 cd /data/sbdp/PHOENIX/PROTECTED/"$study"
 for p in *; do # loop over all patients in the specified study folder on PHOENIX
 	# first check that it is truly an OLID, that has phone audio data to send

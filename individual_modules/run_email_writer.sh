@@ -26,7 +26,6 @@ if [[ -e "$repo_root"/audio_transcribeme_email_body.txt ]]; then
 	echo "Thank you!" >> "$repo_root"/audio_transcribeme_email_body.txt
 fi
 
-
 # next will finish the lab alert email by looping over all patients to add more specific information
 # (in the process will also remove the prepended "new+" tags on the pending_audio files, as they are added to email)
 # right now going in patient order with the information, but in the future may want to be more strategic about ordering

@@ -46,6 +46,13 @@ echo "Automatically send acceptable diaries for transcription? (Y or N)"
 read auto_send_on
 # make sure the answer was valid, and if it is yes gather the other settings
 if [ $auto_send_on = "Y" ] || [ $auto_send_on = "y" ]; then
+	echo "Would you like to set an upper limit on the amount of audio the code can send? (Y or N)"
+	read auto_send_limit_bool
+	if [ $auto_send_limit_bool = "Y" ] || [ $auto_send_limit_bool = "y" ]; then
+		echo "Maximum sum audio length (in minutes)?"
+		read auto_send_limit
+	fi
+
 	# get password for transcribeme sftp
 	echo "TranscribeMe account password?"
 	read -s transcribeme_password
@@ -76,6 +83,13 @@ if [ $auto_send_on = "Y" ] || [ $auto_send_on = "y" ]; then
 	echo "$length_cutoff"
 	echo "and db level of at least:"
 	echo "$db_cutoff"
+	if [ $auto_send_limit_bool = "Y" ] || [ $auto_send_limit_bool = "y" ]; then
+		echo "If the total minutes of audio across patients exceeds:"
+		echo "$auto_send_limit"
+		echo "instead of being uploaded to TranscribeMe, all decrypted files will be left in the to_send subfolder of phone/processed/audio for each patient"
+	else
+		echo "All acceptable audio will be sent regardless of total amount"
+	fi
 else
 	echo "Audio will not be automatically sent to TranscribeMe"
 	echo "all decrypted files will be left in the to_send subfolder of phone/processed/audio for each patient"
@@ -129,9 +143,6 @@ for p in *; do
 			fi
 		fi
 	fi
-
-
-
 done
 
 # add current time for runtime tracking purposes
@@ -227,23 +238,32 @@ echo ""
 #  once auto is turned on, it will assume any qualifying newly decrypted audios should be sent, will not stop to confirm even for a high number of minutes)
 if [ $auto_send_on = "Y" ] || [ $auto_send_on = "y" ]; then
 	echo "Sending files for transcription"
+
+	# initialize txt files for email bodies
+	echo "Audio Push Updates for ${study}:" > "$repo_root"/audio_lab_email_body.txt
+	echo "Hi," > "$repo_root"/audio_transcribeme_email_body.txt
+
 	# export transcribeme password for script to use
 	export transcribeme_password
+	export auto_send_limit_bool
+	if [ $auto_send_limit_bool = "Y" ] || [ $auto_send_limit_bool = "y" ]; then
+		export auto_send_limit
+	fi
 	# run script
 	bash "$repo_root"/individual_modules/run_transcription_push.sh
 	# clear out the password and unset now that script done
 	export transcribeme_password=""
 	unset transcribeme_password
+	if [ $auto_send_limit_bool = "Y" ] || [ $auto_send_limit_bool = "y" ]; then
+		unset auto_send_limit
+	fi
+	unset auto_send_limit_bool
 	echo ""
 
 	# add current time for runtime tracking purposes
 	now=$(date +"%T")
 	echo "Current time: ${now}"
 	echo ""
-
-	# initialize txt files for email bodies
-	echo "Audio Push Updates for ${study}:" > "$repo_root"/audio_lab_email_body.txt
-	echo "Hi," > "$repo_root"/audio_transcribeme_email_body.txt
 
 	# call script to fill in rest of email bodies
 	echo "Preparing information for automated emails"
