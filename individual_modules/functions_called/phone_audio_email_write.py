@@ -65,6 +65,52 @@ def get_email_summary_stats(study, lab_email_path, transcribeme_email_path):
 		# update total count across the entire study
 		num_minutes = num_minutes + cur_count
 
+	# also get total length of files not sent
+	num_minutes_unsent = 0.0
+	for filep in send_paths_list:
+		# find dpdash path from file path
+		filen = filep.split("/")[-1]
+		OLID = filen.split("_")[1]
+		os.chdir("/data/sbdp/PHOENIX/PROTECTED/" + study + "/" + OLID + "/phone/processed/audio")
+		dpdash_name_format = study + "-" + OLID + "-phoneAudioQC-day1to*.csv"
+		dpdash_name = glob.glob(dpdash_name_format)[0] # DPDash script deletes any older days in this subfolder, so should only get 1 match each time
+		dpdash_qc = pd.read_csv(dpdash_name) 
+		# technically reloading this CSV for each file instead of for each patient, but should be a fast operation because CSV is small
+		# also shouldn't be repeated that much in a normal run, as there cannot be more new uploads for a single patient than the number of days since the last run of the pipeline
+
+		# get day number from file name, to assist in lookup of df
+		day_num = int(filen.split("day")[1].split(".")[0])
+		# should always be exactly one matching entry, as only allowing one file into DPDash per day (first submitted)
+		cur_row = dpdash_qc[dpdash_qc["day"]==day_num] 
+		# then get total time of that particular recording (in minutes)
+		cur_count = float(cur_row["length(minutes)"].tolist()[0])
+
+		# update total count across the entire study
+		num_minutes_unsent = num_minutes_unsent + cur_count
+
+	# and get total length of bad files
+	num_minutes_bad = 0.0
+	for filep in decrypted_paths_list:
+		# find dpdash path from file path
+		filen = filep.split("/")[-1]
+		OLID = filen.split("_")[1]
+		os.chdir("/data/sbdp/PHOENIX/PROTECTED/" + study + "/" + OLID + "/phone/processed/audio")
+		dpdash_name_format = study + "-" + OLID + "-phoneAudioQC-day1to*.csv"
+		dpdash_name = glob.glob(dpdash_name_format)[0] # DPDash script deletes any older days in this subfolder, so should only get 1 match each time
+		dpdash_qc = pd.read_csv(dpdash_name) 
+		# technically reloading this CSV for each file instead of for each patient, but should be a fast operation because CSV is small
+		# also shouldn't be repeated that much in a normal run, as there cannot be more new uploads for a single patient than the number of days since the last run of the pipeline
+
+		# get day number from file name, to assist in lookup of df
+		day_num = int(filen.split("day")[1].split(".")[0])
+		# should always be exactly one matching entry, as only allowing one file into DPDash per day (first submitted)
+		cur_row = dpdash_qc[dpdash_qc["day"]==day_num] 
+		# then get total time of that particular recording (in minutes)
+		cur_count = float(cur_row["length(minutes)"].tolist()[0])
+
+		# update total count across the entire study
+		num_minutes_bad = num_minutes_bad + cur_count
+
 	# round the number of minutes when done, for email purposes
 	# note int rounds towards 0, and since our number will always be positive it is equivalent to taking the floor
 	num_minutes = int(num_minutes)
@@ -74,12 +120,23 @@ def get_email_summary_stats(study, lab_email_path, transcribeme_email_path):
 	# now get corresponding cost - we pay $1.75 per minute
 	est_cost = round(1.75 * num_minutes, 2) # round to have units of cents
 
+	# do the same for the unsent minutes if there are any
+	if num_minutes_unsent > 0:
+		num_minutes_unsent = int(num_minutes_unsent)
+		# just make sure taking the floor never results in an email saying we have 0 minutes, unless there are also 0 audios uploaded
+		if num_minutes_unsent == 0 and num_failed > 0:
+			num_minutes_unsent = 1 
+		# now get corresponding cost - we pay $1.75 per minute
+		est_cost_unsent = round(1.75 * num_minutes_unsent, 2) # round to have units of cents
+
 	# actually add to the email bodies now, first the lab email
 	with open(lab_email_path, 'a') as f: # a for append mode, so doesn't erase any info already included
 		# prep main sentence text
 		lab_email_intro = str(num_audios) + " total phone diaries were newly processed for " + study + ". Of those, " + str(num_selected) + " were identified to be suitable for transcription, and " + str(num_pushed) + " successfully uploaded to TranscribeMe."
 		lab_email_cost = "The uploaded audios totalled ~" + str(num_minutes) + " minutes, for an estimated transcription cost of $" + str(est_cost) + "."
-		lab_email_problems = "For the " + str(num_rejected) + " rejected audios, " + str(num_secondary) + " were rejected because they were not the first diary submitted in the day, " + str(num_short) + " were rejected due to short length, and " + str(num_quiet) + " were rejected due to low volume."
+		if num_minutes_unsent > 0:
+			lab_email_unsent_cost = "Audio files that were found to be transcribable but were NOT successfully uploaded to TranscribeMe totalled ~" + str(num_minutes_unsent) + " minutes, for a potential future transcription cost of ~$" + str(est_cost_unsent) + "."
+		lab_email_problems = "For the " + str(num_rejected) + " rejected audios (~" + str(round(num_minutes_bad),1) + " total minutes), " + str(num_secondary) + " were rejected because they were not the first diary submitted in the day, " + str(num_short) + " were rejected due to short length, and " + str(num_quiet) + " were rejected due to low volume."
 		
 		# actually do the file writes, end line with each of the 3 lines specified above
 		# (python file.write() does not automatically add a trailing new line, while echo used in the bash script will add a trailing new line by default)
@@ -87,6 +144,9 @@ def get_email_summary_stats(study, lab_email_path, transcribeme_email_path):
 		f.write("\n")
 		f.write(lab_email_cost)
 		f.write("\n")
+		if num_minutes_unsent > 0:
+			f.write(lab_email_unsent_cost)
+			f.write("\n")
 		f.write(lab_email_problems)
 		f.write("\n")
 

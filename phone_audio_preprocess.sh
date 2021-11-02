@@ -9,8 +9,8 @@ exec 2> >(tee -ia audio.log >&2)
 
 # hard code at the top the list of email recipients for now
 # for the lab alert email, just listing 3 main addresses to start
-# (giving my Harvard one because mail command seems more finicky with sending to my partners address?)
-lab_email_list="mennis@g.harvard.edu,ELIEBENTHAL@MCLEAN.HARVARD.EDU,jtbaker@partners.org"
+# (use my Partners email here as the lab alert contains more detail about the files)
+lab_email_list="mennis2@partners.org,ELIEBENTHAL@MCLEAN.HARVARD.EDU,jtbaker@partners.org"
 # also have list for email notifying TranscribeMe that there have been new uploads
 # just putting main sales support email for now, and including myself for records
 transcribeme_email_list="sales_support@transcribeme.com,joshua@transcribeme.com,mennis@g.harvard.edu"
