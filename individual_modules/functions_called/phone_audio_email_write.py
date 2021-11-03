@@ -136,7 +136,7 @@ def get_email_summary_stats(study, lab_email_path, transcribeme_email_path):
 		lab_email_cost = "The uploaded audios totalled ~" + str(num_minutes) + " minutes, for an estimated transcription cost of $" + str(est_cost) + "."
 		if num_minutes_unsent > 0:
 			lab_email_unsent_cost = "Audio files that were found to be transcribable but were NOT successfully uploaded to TranscribeMe totalled ~" + str(num_minutes_unsent) + " minutes, for a potential future transcription cost of ~$" + str(est_cost_unsent) + "."
-		lab_email_problems = "For the " + str(num_rejected) + " rejected audios (~" + str(round(num_minutes_bad),1) + " total minutes), " + str(num_secondary) + " were rejected because they were not the first diary submitted in the day, " + str(num_short) + " were rejected due to short length, and " + str(num_quiet) + " were rejected due to low volume."
+		lab_email_problems = "For the " + str(num_rejected) + " rejected audios (~" + str(round(num_minutes_bad,1)) + " total minutes), " + str(num_secondary) + " were rejected because they were not the first diary submitted in the day, " + str(num_short) + " were rejected due to short length, and " + str(num_quiet) + " were rejected due to low volume."
 		
 		# actually do the file writes, end line with each of the 3 lines specified above
 		# (python file.write() does not automatically add a trailing new line, while echo used in the bash script will add a trailing new line by default)
