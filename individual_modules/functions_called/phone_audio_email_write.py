@@ -18,9 +18,12 @@ def get_email_summary_stats(study, lab_email_path, transcribeme_email_path):
 	pending_folders_list = glob.glob(path_of_interest3)
 	# then expand the lists to contain the contents of those folders (filtered when appropriate, see below)
 	decrypted_paths_list = []
+	decrypted_pt_match_list = []
 	send_paths_list = []
 	pending_paths_list_all = []
 	for folder in decrypted_folders_list:
+		cur_pt = folder.split("/")[0]
+		decrypted_pt_match_list.extend([cur_pt for x in os.listdir(folder)])
 		decrypted_paths_list.extend(os.listdir(folder))
 	for folder in send_folders_list:
 		send_paths_list.extend(os.listdir(folder))
@@ -90,10 +93,11 @@ def get_email_summary_stats(study, lab_email_path, transcribeme_email_path):
 
 	# and get total length of bad files
 	num_minutes_bad = 0.0
+	index_counter = 0
 	for filep in decrypted_paths_list:
 		# find dpdash path from file path
 		filen = filep.split("/")[-1]
-		OLID = filen.split("_")[1]
+		OLID = decrypted_pt_match_list[index_counter]
 		os.chdir("/data/sbdp/PHOENIX/PROTECTED/" + study + "/" + OLID + "/phone/processed/audio")
 		dpdash_name_format = study + "-" + OLID + "-phoneAudioQC-day1to*.csv"
 		dpdash_name = glob.glob(dpdash_name_format)[0] # DPDash script deletes any older days in this subfolder, so should only get 1 match each time
@@ -110,6 +114,9 @@ def get_email_summary_stats(study, lab_email_path, transcribeme_email_path):
 
 		# update total count across the entire study
 		num_minutes_bad = num_minutes_bad + cur_count
+
+		# increment the counter for looking up in pt list
+		index_counter = index_counter + 1
 
 	# round the number of minutes when done, for email purposes
 	# note int rounds towards 0, and since our number will always be positive it is equivalent to taking the floor
