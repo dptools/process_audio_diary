@@ -1,9 +1,9 @@
 # process_audio_diary
-Code for quality control and feature extraction/visualization from phone audio diaries, including workflow for automated push/pull with TranscribeMe and sanity check of resulting transcripts.  
+Code for quality control and feature extraction/visualization from phone audio diaries, including workflow for automated push/pull with TranscribeMe and sanity check of resulting transcripts.   
 
 Information about the steps of the pipeline, including expected inputs/outputs, can be found below. Any additional questions should be directed to mennis@g.harvard.edu.
 
-The current version of this repository matches what is used internally for Baker Lab audio diary data. It is in the process of being generalized for wider release.
+The current version of this repository matches what is used internally for Baker Lab audio diary data. It is in the process of being generalized for wider release. This is a prerelease, made publicly viewable for the purposes of testing on collaborator machines.
 
 
 ### Table of Contents

@@ -99,16 +99,12 @@ def get_email_summary_stats(study, lab_email_path, transcribeme_email_path):
 		filen = filep.split("/")[-1]
 		OLID = decrypted_pt_match_list[index_counter]
 		os.chdir("/data/sbdp/PHOENIX/PROTECTED/" + study + "/" + OLID + "/phone/processed/audio")
-		dpdash_name_format = study + "-" + OLID + "-phoneAudioQC-day1to*.csv"
-		dpdash_name = glob.glob(dpdash_name_format)[0] # DPDash script deletes any older days in this subfolder, so should only get 1 match each time
-		dpdash_qc = pd.read_csv(dpdash_name) 
+		audio_qc_raw_name = study + "_" + OLID + "_phone_audioQC_output.csv"
+		audio_qc_df = pd.read_csv(audio_qc_raw_name) 
 		# technically reloading this CSV for each file instead of for each patient, but should be a fast operation because CSV is small
 		# also shouldn't be repeated that much in a normal run, as there cannot be more new uploads for a single patient than the number of days since the last run of the pipeline
 
-		# get day number from file name, to assist in lookup of df
-		day_num = int(filen.split("day")[1].split(".")[0])
-		# should always be exactly one matching entry, as only allowing one file into DPDash per day (first submitted)
-		cur_row = dpdash_qc[dpdash_qc["day"]==day_num] 
+		cur_row = audio_qc_df[audio_qc_df["filename"]==filep.split("err")[-1]] # remove error code from filename and then match in audio QC spreadsheets 
 		# then get total time of that particular recording (in minutes)
 		cur_count = float(cur_row["length(minutes)"].tolist()[0])
 
