@@ -14,6 +14,7 @@ import string
 import inflect
 import re
 import math
+import copy
 
 # ignore Unicode warning in inflect package
 import warnings
@@ -53,7 +54,7 @@ def distribution_plots(dist_df, pdf_save_path, ignore_list=[], bins_list=None, r
 
 # create heatmap from input dataframe, save figure at save_path
 # for coloring, should provide either absolute bounds using abs_col_bounds_list or a distribution for each feature (matching column name) with distribution_df. can also provide GB_input_dfs instead if want an RGB heatmap
-def generate_horizontal_heatmap(input_df, save_path, drop_cols=[], distribution_df=None, abs_col_bounds_list=[], GB_input_dfs=[], colormap=cm.bwr, nan_color="grey", property_reorder_name=None, rel_col_std_bounds=3, cluster_bars_index=[], time_bars_offset=0, time_nums_offset=0, time_bars_index_space=7, x_axis_title="Study Day", title=None, label_features=True, features_rename=[], label_time=False, flip_y_label=False, fig_size=(30,5), x_ticks_add_offset=-0.02, y_ticks_add_offset=-0.02, cap_max_min=True,  minors_width=1, bars_width=5, nan_fill=-10000):
+def generate_horizontal_heatmap(input_df, save_path, drop_cols=[], distribution_df=None, abs_col_bounds_list=[], GB_input_dfs=[], colormap=copy.copy(cm.get_cmap("bwr")), nan_color="grey", property_reorder_name=None, rel_col_std_bounds=3, cluster_bars_index=[], time_bars_offset=0, time_nums_offset=0, time_bars_index_space=7, x_axis_title="Study Day", title=None, label_features=True, features_rename=[], label_time=False, flip_y_label=False, fig_size=(30,5), x_ticks_add_offset=-0.02, y_ticks_add_offset=-0.02, cap_max_min=True,  minors_width=1, bars_width=5, nan_fill=-10000):
 	for dc in drop_cols:
 		input_df.drop(columns=dc,inplace=True)
 	plt.rcParams["axes.grid"] = False
