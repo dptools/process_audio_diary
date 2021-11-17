@@ -10,7 +10,7 @@ exec 2> >(tee -ia transcript.log >&2)
 
 # hard code at the top the list of email recipients for now, just listing 3 main addresses
 # (giving my Harvard one because mail command seems more finicky with sending to my partners address?)
-email_list="mennis@g.harvard.edu,ELIEBENTHAL@MCLEAN.HARVARD.EDU,jtbaker@partners.org"
+email_list="mennis2@partners.org,ELIEBENTHAL@MCLEAN.HARVARD.EDU,jtbaker@partners.org"
 
 # start by getting the absolute path to the directory this script is in, which will be the top level of the repo
 # this way script will work even if the repo is downloaded to a new location, rather than relying on hard coded paths to where I put the repo. 

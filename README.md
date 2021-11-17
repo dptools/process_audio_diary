@@ -32,6 +32,11 @@ Note that before the first time running on a new machine, it may be necessary to
 	import nltk
 	nltk.download('cmudict')
 
+Similarly, a couple of the required packages are not conda installable, so that before the first the run the following should be entered on the command line (in the activated conda environment):
+
+	pip install vaderSentiment
+	pip install wordcloud
+
 It will also be necessary to install the lab encryption model for a first run, if the raw files need to be decrypted. To do so, enter the following command after activating the environment:
 
 	pip install cryptease
