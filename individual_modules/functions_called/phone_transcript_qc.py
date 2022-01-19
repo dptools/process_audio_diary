@@ -7,6 +7,8 @@
 # A few efficiency improvements I could make noted below.
 
 import os
+import re
+import string
 import pandas as pd 
 import numpy as np 
 import sys
@@ -86,8 +88,12 @@ def diary_transcript_qc(study, OLID):
 		inaud_per = [x.count("[inaudible]") for x in cur_sentences]
 		quest_per = [x.count("?]") for x in cur_sentences] # assume bracket should never follow a ? unless the entire word is bracketed in
 		redact_per = [x.count("[redacted]") for x in cur_sentences]
-		um_per = [x.count("um") for x in cur_sentences]
-		uh_per = [x.count("uh") for x in cur_sentences]
+		# use regex for nonverbal edits now to improve accuracy (don't include e.g. lithium)
+		reg_ex_pattern = "[^a-z]u+[hm]+[^a-z]"
+		words_lists = [x.split(" ") for x in cur_sentences]
+		# add extra spaces to the words in the sentences for the regex, to ensure it can still match even when looking for non-alphabet chars surrounding
+		reg_ex_list_hack = [" " + "  ".join(x) + " " for x in words_lists]
+		uhum_per = [len(re.findall(reg_ex_pattern, x)) for x in reg_ex_list_hack]
 		like_per = [x.count("like,") for x in cur_sentences]
 		know_per = [x.count("you know,") for x in cur_sentences]
 		mean_per = [x.count("i mean,") for x in cur_sentences]
@@ -101,7 +107,7 @@ def diary_transcript_qc(study, OLID):
 		ninaud.append(np.nansum(inaud_per))
 		nquest.append(np.nansum(quest_per))
 		nredact.append(np.nansum(redact_per))
-		nuhum.append(np.nansum(um_per) + np.nansum(uh_per))
+		nuhum.append(np.nansum(uhum_per))
 		nfiller.append(np.nansum(like_per) + np.nansum(know_per) + np.nansum(mean_per))
 		nrestarts.append(np.nansum(ddash_per))
 		nrepeats.append(np.nansum(dash_repetition) + np.nansum(word_repetition))
