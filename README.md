@@ -5,6 +5,8 @@ Information about the steps of the pipeline, including expected inputs/outputs, 
 
 The current version of this repository matches what is used internally for Baker Lab audio diary data. It is in the process of being generalized for wider release. This is a prerelease, made publicly viewable for the purposes of testing on collaborator machines.
 
+Note all supplemental utility scripts described in the internal lab AV code guide for summer 2022 can be found in the new subfolder summer_utilities. As we will not be collecting new audio diaries over the summer, these scripts can assist in running any backlog processing in a more efficient manner. For more information on when/how to use, see the mentioned document. 
+
 
 ### Table of Contents
 1. [Setup](#setup)

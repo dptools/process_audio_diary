@@ -65,7 +65,7 @@ for p in *; do # loop over all patients in the specified study folder on PHOENIX
 			# if it's not ASCII need to skip the file, setup error message
 			# for now will need to manually fix any offending txt files and then rerun the conversion (and later pipeline steps) for those
 			# hopefully in future will have a way to deal with it fully automatically
-			if [[ -z "${repo_root}" ]]; then
+			if [[ ! -e "${repo_root}"/transcript_lab_email_body.txt ]]; then
 				# if this module was called independently, just print error message
 				echo "" # also add spacing around it because the grep output could end up being long
 				echo "Found transcript that is not ASCII encoded, skipping for now. Please address the following portions of ${file}:"
@@ -117,7 +117,7 @@ for p in *; do # loop over all patients in the specified study folder on PHOENIX
 	if [ "$pt_has_new" = true ]; then
 		echo "Done converting new transcripts for ${p}"
 	fi
-	if [[ ! -z "${repo_root}" ]]; then # i.e. if was called via pipeline, so that error message above only went into email
+	if [[ -e "${repo_root}"/transcript_lab_email_body.txt ]]; then # i.e. if was called via pipeline, so that error message above only went into email
 		if [ "$encountered_non_ascii" = true ]; then
 			echo "(note though that at least one file failed to convert for this patient due to non-ASCII characters, see bottom of email alert for more details)"
 		fi

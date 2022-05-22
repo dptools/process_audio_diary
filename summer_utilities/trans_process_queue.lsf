@@ -1,0 +1,110 @@
+#!/bin/bash
+#BSUB -J BLSLang
+#BSUB -o /data/sbdp/logs/audio_diary/output-log-bls-lang-%J.out
+#BSUB -e /data/sbdp/logs/audio_diary/error-log-bls-lang-%J.err
+
+# Submit job as follows:
+# ---
+# bsub < trans_process_queue.lsf
+# ---
+
+#BSUB -q normal
+#BSUB -n 2
+#BSUB -R rusage[mem=4000]
+
+# SETTINGS TO CHANGE!
+bash_home_path=/PHShome/me741/.bashrc # path to bashrc or bash_profile for current user
+repo_root=/PHShome/me741/process_audio_diary # path to the repository folder for current user
+# make sure conda environment for process_audio is set up before running this!
+
+# Some important variables to check (Can be removed later)
+echo '---PROCESS RESOURCE LIMITS---'
+ulimit -a
+echo '---SHARED LIBRARY PATH---'
+echo $LD_LIBRARY_PATH
+echo '---APPLICATION SEARCH PATH:---'
+echo $PATH
+echo '---LSF Parameters:---'
+printenv | grep '^LSF'
+echo '---LSB Parameters:---'
+printenv | grep '^LSB'
+echo '---LOADED MODULES:---'
+module list
+echo '---SHELL:---'
+echo $SHELL
+echo '---HOSTNAME:---'
+hostname
+echo '---GROUP MEMBERSHIP (files are created in the first group listed):---'
+groups
+echo '---DEFAULT FILE PERMISSIONS (UMASK):---'
+umask
+echo '---CURRENT WORKING DIRECTORY:---'
+pwd
+echo '---DISK SPACE QUOTA---'
+df .
+echo '---TEMPORARY SCRATCH FOLDER ($TMPDIR):---'
+echo $TMPDIR
+
+source /etc/profile.d/modules.sh
+source "$bash_home_path"
+module load anaconda
+source activate audio_process
+
+# in this instance likely just keeping study as BLS
+study=BLS
+export study
+export repo_root
+
+# let user know script is starting
+echo ""
+echo "Beginning script - phone transcript preprocessing for:"
+echo "$study"
+echo ""
+
+# add current time for runtime tracking purposes
+now=$(date +"%T")
+echo "Current time: ${now}"
+echo ""
+
+# convert the provided transcript txt files to CSV format for processing
+echo "Converting newly pulled transcripts to CSV"
+bash "$repo_root"/individual_modules/run_transcript_csv_conversion.sh
+echo ""
+
+# add current time for runtime tracking purposes
+now=$(date +"%T")
+echo "Current time: ${now}"
+echo ""
+
+# run transcript QC on all available transcripts for this study
+echo "Running QC on all available transcripts for this study"
+bash "$repo_root"/individual_modules/run_transcript_qc.sh
+echo ""
+
+# add current time for runtime tracking purposes
+now=$(date +"%T")
+echo "Current time: ${now}"
+echo ""
+
+# run DPDash formatting script to create new DPDash formatted audioQC and transcriptQC outputs from the raw outputs of those scripts
+# (this will include updating the transcript availability column of audioQC as well as the obvious updates to transcriptQC on DPDash)
+echo "Creating DPDash formatted QC outputs"
+bash "$repo_root"/individual_modules/run_dpdash_format.sh
+echo ""
+
+# add current time for runtime tracking purposes
+now=$(date +"%T")
+echo "Current time: ${now}"
+echo ""
+
+# extract NLP features
+echo "Extracting NLP features for all available transcripts"
+bash "$repo_root"/individual_modules/run_transcript_nlp.sh
+echo ""
+
+# add current time for runtime tracking purposes
+now=$(date +"%T")
+echo "Current time: ${now}"
+echo ""
+
+echo "Script completed"
