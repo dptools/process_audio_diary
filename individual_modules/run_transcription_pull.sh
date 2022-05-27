@@ -44,7 +44,7 @@ fi
 
 # body:
 # initialize email alert txt file, if this was called by the pipeline (no email alert from standalone module)
-if [ $pipeline = "Y" ]; then
+if [[ $pipeline == "Y" ]]; then
 	echo "Transcription Pull Updates for ${study}:" > "$repo_root"/transcript_lab_email_body.txt 
 	echo "" >> "$repo_root"/transcript_lab_email_body.txt # add blank line after main header. no need to add another below because those are automatically added before each patient header
 	# give some additional context for what will be inside this email
@@ -78,7 +78,7 @@ for p in *; do # loop over all patients in the specified study folder on PHOENIX
 	python "$func_root"/phone_transcribeme_sftp_pull.py "$study" "$p" "$transcribeme_password" "$pipeline" "$repo_root"/transcript_lab_email_body.txt
 
 	# now add new info about this OLID to email alert body (if this is part of pipeline)
-	if [ $pipeline = "Y" ]; then
+	if [[ $pipeline == "Y" ]]; then
 		# pending_audio folder will contain all necessary info
 		cd pending_audio
 

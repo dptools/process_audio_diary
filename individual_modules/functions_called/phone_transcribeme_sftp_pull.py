@@ -46,7 +46,11 @@ def transcript_pull(study, OLID, password, pipeline=False, lab_email_path=None):
 			# nothing to do here, most likely need to just keep waiting on this transcript
 			# in future could look into detecting types of connection errors, perhaps not always assuming a miss means not transcribed yet
 			# even the current email alerts should make other issues easy to catch over time though, so not a big priority
-			pass 
+			try:
+				# if connection fails though, it may create an empty txt file, remove that to avoid confusion
+				os.remove(local_path)
+			except:
+				pass 
 
 	# log some very basic info about success of script
 	print("(" + str(len(successful_transcripts)) + " total transcripts pulled)")
@@ -72,12 +76,30 @@ def transcript_pull(study, OLID, password, pipeline=False, lab_email_path=None):
 			cnopts.hostkeys = None # ignore hostkey
 			with pysftp.Connection(host, username=username, password=password, cnopts=cnopts) as sftp:
 				sftp.remove(remove_path) 
+		except:
+			# expect failures here to be rare (if generic connection problems successful_transcripts would likely be empty)
+			print("Error cleaning up TranscribeMe server (audio deletion), please check on file " + match_name)
+			# also add a related warning in this patient's section of email file if this was called via pipeline - but just make it a generic one liner
+			if pipeline and not prev_problem:
+				with open(lab_email_path, 'a') as f:
+					# not a particularly urgent problem, but could go unnoticed for a long time if not notified, and best practice is to minimize number of copies/locations with decrypted audio
+					warning_text = "[May have encountered a problem cleaning up completed audios for " + OLID + " on TranscribeMe server, please review manually]"
+					f.write("\n") # add a blank line before the warning
+					f.write(warning_text)
+					f.write("\n") # and add a blank line after
+
+				prev_problem = True # now that it's been added no need to add again if another problem arises
+		# split apart the deleting and the moving to archive so one can still happen without the other!
+		try:
+			cnopts = pysftp.CnOpts()
+			cnopts.hostkeys = None # ignore hostkey
+			with pysftp.Connection(host, username=username, password=password, cnopts=cnopts) as sftp:
 				if not sftp.exists(archive_folder):
 					sftp.mkdir(archive_folder)
 				sftp.rename(cur_path, archive_path)
 		except:
 			# expect failures here to be rare (if generic connection problems successful_transcripts would likely be empty)
-			print("Error cleaning up TranscribeMe server, please check on file " + match_name)
+			print("Error cleaning up TranscribeMe server (txt archive), please check on file " + match_name)
 			# also add a related warning in this patient's section of email file if this was called via pipeline - but just make it a generic one liner
 			if pipeline and not prev_problem:
 				with open(lab_email_path, 'a') as f:
