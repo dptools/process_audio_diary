@@ -49,7 +49,9 @@ for p in *; do # loop over all patients in the specified study folder on PHOENIX
 	# (latter just for main pipeline, as details of missed transcripts will only go in email alert in that case)
 
 	# all text files on top level should be raw transcripts from TranscribeMe, loop through them
-	for file in *.txt; do		
+	for file in *.txt; do	
+		[[ -z $file ]] && continue # skip if there is no actual file to prevent silly error messages
+
 		# in the future may add additional checks to ensure only expected transcript files are in this folder?
 		name=$(echo "$file" | awk -F '.' '{print $1}')
 		

@@ -78,6 +78,8 @@ echo ""
 
 # create heatmaps to see progression of select audio and transcript QC features over time per patient (each diary one block)
 echo "Generating QC heatmaps for each patient"
+# in this queue of the viz script delete all heatmaps so new transcript QC features can be propagated
+rm -rf /data/sbdp/PHOENIX/PROTECTED/BLS/*/phone/processed/audio/heatmaps
 bash "$repo_root"/individual_modules/run_heatmap_plots.sh
 echo ""
 
@@ -100,6 +102,25 @@ echo ""
 # since no need to loop over patients here or do any other bash preprocessing, just call python script directly
 echo "Creating study-wide correlation matrices"
 python "$repo_root"/individual_modules/functions_called/phone_diary_correlations.py "$study"
+echo ""
+
+# add current time for runtime tracking purposes
+now=$(date +"%T")
+echo "Current time: ${now}"
+echo ""
+
+echo "Updating all relevant permissions for lab"
+# focus on the transcripts here because audio is already done for this study
+# don't touch transcript .txt or pending audio folders, as those should not need to be writable for anyone running transcript feature extraction or viz scripts
+chmod 770 /data/sbdp/Distributions/phone/voiceRecording/*
+chmod 770 /data/sbdp/PHOENIX/PROTECTED/BLS/*/phone/processed/audio/*.pdf
+chmod 770 /data/sbdp/PHOENIX/PROTECTED/BLS/*/phone/processed/audio/*_NLPFeaturesSummary.csv
+chmod 770 /data/sbdp/PHOENIX/PROTECTED/BLS/*/phone/processed/audio/*_transcriptQC_output.csv
+chmod 770 /data/sbdp/PHOENIX/PROTECTED/BLS/*/phone/processed/audio/*-phoneTranscriptQC-day*.csv
+chmod -R 770 /data/sbdp/PHOENIX/PROTECTED/BLS/*/phone/processed/audio/heatmaps
+chmod -R 770 /data/sbdp/PHOENIX/PROTECTED/BLS/*/phone/processed/audio/wordclouds
+chmod -R 770 /data/sbdp/PHOENIX/PROTECTED/BLS/*/phone/processed/audio/transcripts/csv
+chmod -R 770 /data/sbdp/PHOENIX/PROTECTED/BLS/*/phone/processed/audio/transcripts/csv_with_features
 echo ""
 
 # add current time for runtime tracking purposes
