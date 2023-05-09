@@ -1,5 +1,7 @@
 # process_audio_diary
 
+[![DOI](https://zenodo.org/badge/581321189.svg)](https://zenodo.org/badge/latestdoi/581321189)
+
 This pipeline serves to facilitate data management and processing of daily participant app-based audio journal recordings for digital psychiatry research, a promising up and coming datatype. The code is currently an internal Baker Lab tool, made openly available for use by collaborators and more general reference by the broader research community. Still, keep in mind it was written as infrastructure for a single research group.
 
 In particular, my code handles quality control and feature extraction/visualization from phone audio diaries collected via Beiwe, including a workflow for automated push/pull with TranscribeMe and sanity check of resulting transcripts. In this process it handles a number of file organization tasks, including logistics for preserving patient privacy such as encrypting the most sensitive outputs and removing info like real dates from those outputs marked as deidentified. It also provides additional tools to assist in data flow and QC monitoring, most notably a system for email alerts that can notify lab members whenever new audio files are processed or new transcripts are returned by TranscribeMe. 
